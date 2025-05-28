@@ -1,28 +1,25 @@
-import React, { useState } from 'react';
-import type { Flag } from './types';
-
-const allFlags: Flag[] = [
-    { code: 'fr', country: 'France' },
-    { code: 'de', country: 'Germany' },
-    { code: 'bt', country: 'Bhutan' },
-    { code: 'sz', country: 'Eswatini' },
-    // Add more flags here
-];
+import React, { useState, useEffect } from 'react';
+import { flags as allFlags } from "./data/flags";
+import type { Flag } from "./data/flags";
 
 export default function FlagGame() {
     const [stage, setStage] = useState<'select' | 'play'>('select');
-    const [selectedFlags, setSelectedFlags] = useState<string[]>([]);
     const [missedFlags, setMissedFlags] = useState<{ code: string; correct: string; guess: string }[]>([]);
+    const [selectedFlags, setSelectedFlags] = useState<string[]>(() => {
+        const stored = localStorage.getItem('selectedFlags');
+        return stored ? JSON.parse(stored) : allFlags.map(flag => flag.code);;
+    });
 
-    // Game state — must be outside any if-blocks
+    useEffect(() => {
+        localStorage.setItem('selectedFlags', JSON.stringify(selectedFlags));
+    }, [selectedFlags]);
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [guess, setGuess] = useState('');
     const [feedback, setFeedback] = useState('');
     const [score, setScore] = useState(0);
 
-    const selectedFlagObjects = allFlags.filter(flag =>
-        selectedFlags.includes(flag.code)
-    );
+    const selectedFlagObjects = allFlags.filter(flag => selectedFlags.includes(flag.code));
 
     const startGame = () => {
         if (selectedFlags.length === 0) {
@@ -34,6 +31,7 @@ export default function FlagGame() {
         setScore(0);
         setGuess('');
         setFeedback('');
+        setMissedFlags([]);
     };
 
     const toggleFlag = (code: string) => {
@@ -66,7 +64,6 @@ export default function FlagGame() {
         }, 1500);
     };
 
-    // Stage 1: Select flags
     if (stage === 'select') {
         return (
             <div style={{ padding: '2rem' }}>
@@ -77,65 +74,73 @@ export default function FlagGame() {
                     gap: '1rem',
                     marginTop: '1rem'
                 }}>
-                {allFlags.map(flag => (
-                    <div key={flag.code}
+                    {allFlags.map(flag => (
+                        <div key={flag.code}
                             onClick={() => toggleFlag(flag.code)}
                             style={{
-                            border: selectedFlags.includes(flag.code) ? '3px solid green' : '1px solid gray',
-                            padding: '0.5rem',
-                            textAlign: 'center',
-                            cursor: 'pointer'
+                                border: selectedFlags.includes(flag.code) ? '3px solid green' : '1px solid gray',
+                                padding: '0.5rem',
+                                textAlign: 'center',
+                                cursor: 'pointer'
                             }}>
-                        <img
-                            src={`/flags/${flag.code}.png`}
-                            alt={flag.country}
-                            style={{ width: '80px', height: 'auto' }}
-                        />
-                        <p>{flag.country}</p>
-                    </div>
-                ))}
+                            <img
+                                src={`/flags/${flag.code}.png`}
+                                alt={flag.country}
+                                style={{ width: '80px', height: 'auto' }}
+                            />
+                            <p>{flag.country}</p>
+                        </div>
+                    ))}
                 </div>
                 <br />
-                <button onClick={startGame}>Start Game</button>
+                <div style={{ marginTop: '1.5rem' }}>
+                    <button onClick={startGame} style={{ marginRight: '1rem' }}>
+                        Start Game
+                    </button>
+                    <button
+                        onClick={() => setSelectedFlags(allFlags.map(flag => flag.code))}
+                        style={{ backgroundColor: '#f44336', color: 'white' }}
+                    >
+                        Clear Progress
+                    </button>
+                </div>
             </div>
         );
     }
 
-    // Stage 2: Play game
     if (stage === 'play') {
         if (currentIndex >= selectedFlagObjects.length) {
-            return (
-                <div style={{ textAlign: 'center', padding: '2rem' }}>
-                    <h2>Game Over</h2>
-                    <p>Your score: {score} / {selectedFlagObjects.length}</p>
-                    
-                    {missedFlags.length > 0 && (
-                        <div style={{ marginTop: '2rem' }}>
-                            <h3>Incorrect Answers</h3>
-                            <ul style={{ listStyle: 'none', padding: 0 }}>
+        return (
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+                <h2>Game Over</h2>
+                <p>Your score: {score} / {selectedFlagObjects.length}</p>
+
+                {missedFlags.length > 0 && (
+                    <div style={{ marginTop: '2rem' }}>
+                        <h3>Incorrect Answers</h3>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
                             {missedFlags.map((flag, index) => (
-                                <li key={index} style={{ marginBottom: '1rem' }}>
+                            <li key={index} style={{ marginBottom: '1rem' }}>
                                 <img
                                     src={`/flags/${flag.code}.png`}
                                     alt={flag.correct}
                                     style={{ width: '60px', verticalAlign: 'middle', marginRight: '1rem' }}
                                 />
                                 <strong>{flag.correct}</strong> (you guessed: <em>{flag.guess || 'blank'}</em>)
-                                </li>
+                            </li>
                             ))}
-                            </ul>
-                        </div>
-                    )}
+                        </ul>
+                    </div>
+                )}
 
-                    <button onClick={() => {
-                        setStage('select');
-                        setSelectedFlags([]);
-                        setMissedFlags([]);
-                    }}>
-                        Play Again
-                    </button>
-                </div>
-            );
+                <button onClick={() => {
+                    setStage('select');
+                    setMissedFlags([]);
+                }}>
+                    Play Again
+                </button>
+            </div>
+        );
         }
 
         const currentFlag = selectedFlagObjects[currentIndex];
@@ -155,9 +160,9 @@ export default function FlagGame() {
                         onChange={(e) => setGuess(e.target.value)}
                         placeholder="Enter country name"
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                handleSubmit();
-                            }
+                        if (e.key === 'Enter') {
+                            handleSubmit();
+                        }
                         }}
                     />
                     <button onClick={handleSubmit}>Submit</button>
@@ -169,5 +174,5 @@ export default function FlagGame() {
         );
     }
 
-    return null;
+  return null;
 }
