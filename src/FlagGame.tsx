@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { flags as allFlags } from "./data/flags";
 import type { Flag } from "./data/flags";
 
