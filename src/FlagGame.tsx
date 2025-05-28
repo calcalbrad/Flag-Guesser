@@ -97,7 +97,7 @@ export default function FlagGame() {
                                 cursor: 'pointer'
                             }}>
                             <img
-                                src={`/flags/${flag.code}.png`}
+                                src={`/Flags/${flag.code}.png`}
                                 alt={flag.country}
                                 style={{ width: '80px', height: 'auto' }}
                             />
