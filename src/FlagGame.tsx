@@ -135,7 +135,7 @@ export default function FlagGame() {
                             {missedFlags.map((flag, index) => (
                             <li key={index} style={{ marginBottom: '1rem' }}>
                                 <img
-                                    src={`/flags/${flag.code}.png`}
+                                    src={`/Flags/${flag.code}.png`}
                                     alt={flag.correct}
                                     style={{ width: '60px', verticalAlign: 'middle', marginRight: '1rem' }}
                                 />
@@ -162,7 +162,7 @@ export default function FlagGame() {
             <div style={{ textAlign: 'center', padding: '2rem' }}>
                 <h2>Guess the Flag</h2>
                 <img
-                    src={`/flags/${currentFlag.code}.png`}
+                    src={`/Flags/${currentFlag.code}.png`}
                     alt="Flag"
                     style={{ width: '200px', height: 'auto', marginBottom: '1rem' }}
                 />
