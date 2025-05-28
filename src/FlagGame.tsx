@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { flags as allFlags } from "./data/flags";
 import type { Flag } from "./data/flags";
 
+function shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 export default function FlagGame() {
     const [stage, setStage] = useState<'select' | 'play'>('select');
     const [missedFlags, setMissedFlags] = useState<{ code: string; correct: string; guess: string }[]>([]);
@@ -9,6 +18,7 @@ export default function FlagGame() {
         const stored = localStorage.getItem('selectedFlags');
         return stored ? JSON.parse(stored) : allFlags.map(flag => flag.code);;
     });
+    const [shuffledFlags, setShuffledFlags] = useState<Flag[]>([]);
 
     useEffect(() => {
         localStorage.setItem('selectedFlags', JSON.stringify(selectedFlags));
@@ -19,13 +29,16 @@ export default function FlagGame() {
     const [feedback, setFeedback] = useState('');
     const [score, setScore] = useState(0);
 
-    const selectedFlagObjects = allFlags.filter(flag => selectedFlags.includes(flag.code));
-
     const startGame = () => {
         if (selectedFlags.length === 0) {
             alert('Select at least one flag to begin!');
             return;
         }
+
+        const selectedObjects = allFlags.filter(flag => selectedFlags.includes(flag.code));
+        const shuffled = shuffleArray(selectedObjects);
+
+        setShuffledFlags(shuffled);
         setStage('play');
         setCurrentIndex(0);
         setScore(0);
@@ -41,7 +54,7 @@ export default function FlagGame() {
     };
 
     const handleSubmit = () => {
-        const currentFlag = selectedFlagObjects[currentIndex];
+        const currentFlag = shuffledFlags[currentIndex];
         const normalizedGuess = guess.trim().toLowerCase();
         const normalizedAnswer = currentFlag.country.toLowerCase();
 
@@ -109,11 +122,11 @@ export default function FlagGame() {
     }
 
     if (stage === 'play') {
-        if (currentIndex >= selectedFlagObjects.length) {
+        if (currentIndex >= shuffledFlags.length) {
         return (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
                 <h2>Game Over</h2>
-                <p>Your score: {score} / {selectedFlagObjects.length}</p>
+                <p>Your score: {score} / {shuffledFlags.length}</p>
 
                 {missedFlags.length > 0 && (
                     <div style={{ marginTop: '2rem' }}>
@@ -143,7 +156,7 @@ export default function FlagGame() {
         );
         }
 
-        const currentFlag = selectedFlagObjects[currentIndex];
+        const currentFlag = shuffledFlags[currentIndex];
 
         return (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
@@ -169,7 +182,7 @@ export default function FlagGame() {
                 </div>
                 <p>{feedback}</p>
                 <p>Score: {score}</p>
-                <p>Flag {currentIndex + 1} of {selectedFlagObjects.length}</p>
+                <p>Flag {currentIndex + 1} of {shuffledFlags.length}</p>
             </div>
         );
     }
