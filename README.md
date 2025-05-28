@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
@@ -52,3 +53,7 @@ export default tseslint.config({
   },
 })
 ```
+=======
+# Flag-Guesser
+Flag Guessing Game using TypeScript
+>>>>>>> 2ed997c17ee0f0db2a1e8ae01e8d6388c4092644
